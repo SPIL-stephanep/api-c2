@@ -53,9 +53,6 @@ cr.plugins_.SpilAPI = function(runtime) {
 			});
 		}
 	};
-	
-	// instanceProto.draw = function(ctx) {};
-	// instanceProto.drawGL = function (glw) {};
 
 	/**
 	 * Conditions
@@ -71,13 +68,18 @@ cr.plugins_.SpilAPI = function(runtime) {
 		return self.apiReady;
 	};
 	
-	Cnds.isPaused = function() {
+	Cnds.prototype.isPaused = function() {
 		return self.gamePaused;
 	};
 
-	Cnds.isSplashScreenEnabled = function() {
-		return self.API.Branding.getSplashScreen().show;
+	Cnds.prototype.isSplashScreenEnabled = function() {
+		if(self.apiReady) {
+			// by default, show the splash screen if the option is not available from the API
+			return (self._getSplashScreen() && self._getSplashScreen().show) ? self._getSplashScreen().show : true;
+		}
 	};
+
+	Cdns.prototype
 
 	pluginProto.cnds = new Cnds();
 	
@@ -85,40 +87,62 @@ cr.plugins_.SpilAPI = function(runtime) {
 	 * Actions
 	 */
 
-	function _getOutgoingLink(type) {
-		if(!self.branding[type]) {
-			switch(type) {
-				case "logo":
-					_getLogo();
-				break;
-				case "splashScreen":
-					_getSplashScreen();
-				break;
-				default:
-					if(!self.branding[type]) {
-						self.branding[type] = self.API.branding.getLink(type);
-					}
-				break; 
-			}
+	function _isLinkAvailable(type) {
+		if(self.apiReady) {
+			return (self.API.Branding.listLinks() && self.API.Branding.listLinks()[type]) ? true : false;
 		}
+	}
 
-		return (self.branding[type].action) ? self.branding[type].action : false;
+	function _getOutgoingLink(type) {
+		if(self.apiReady) {
+			if(!self.branding[type]) {
+				switch(type) {
+					case "logo":
+						_getLogo();
+					break;
+					case "splashScreen":
+						_getSplashScreen();
+					break;
+					default:
+						if(!self.branding[type] && _isLinkAvailable(type)) {
+							self.branding[type] = self.API.Branding.getLink(type);
+						}
+					break; 
+				}
+			}
+
+			return (self.branding[type] && self.branding[type].action) ? self.branding[type].action : false;
+		}
 	}
 
 	function _getLogo() {
-		if(!self.branding.logo) {
-			self.branding.logo = self.API.branding.getLogo();
-		}
+		if(self.apiReady) {
+			if(!self.branding.logo) {
+				self.branding.logo = self.API.Branding.getLogo();
+			}
 
-		return self.branding.logo;
+			return self.branding.logo;
+		}
 	}
 
 	function _getSplashScreen() {
-		if(!self.branding.splashScreen) {
-			self.branding.splashScreen = self.API.branding.getSplashScreen();
-		}
+		if(self.apiReady) {
+			if(!self.branding.splashScreen) {
+				self.branding.splashScreen = self.API.Branding.getSplashScreen();
+			}
 
-		return self.branding.splashScreen;
+			return self.branding.splashScreen;
+		}
+	}
+
+	function _pauseGame() {
+		self.gamePaused = true;
+		return true;
+	}
+
+	function _resumeGame() {
+		self.gamePaused = false;
+		return true;
 	}
 
 	function Acts() {};
@@ -127,11 +151,16 @@ cr.plugins_.SpilAPI = function(runtime) {
 		if(_getOutgoingLink(type)) {
 			_getOutgoingLink(type).call(this);
 		} else {
+			// if no link action is available, just execute an empty function
 			(function() {}).call(this);
 		}
 	};
 
-	Acts.prototype.requestGamebreak = function() {};
+	Acts.prototype.requestGameBreak = function() {
+		if(self.apiReady) {
+			self.API.GameBreak.request(_pauseGame, _resumeGame);
+		}
+	};
 
 	pluginProto.acts = new Acts();
 	
