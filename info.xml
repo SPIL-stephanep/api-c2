@@ -3,10 +3,10 @@
 	<!-- One of: plugin, behavior, effect -->
 	<type>plugin</type>
 	
-	<name>My Super Plugin</name>	
+	<name>SpilGames API</name>	
 	<version>1.0</version>
-	<author>Ashley Gullen</author>
-	<website>http://www.scirra.com</website>
-	<documentation>https://www.scirra.com/manual/1/construct-2</documentation>
-	<description>A short description of what this addon does.</description>
+	<author>SpilGames</author>
+	<website>http://www.spilgames.com</website>
+	<documentation>http://developers.spilgames.com/</documentation>
+	<description>A Construct2 plugin for the SpilGames HTML5 Game API</description>
 </c2addon>
