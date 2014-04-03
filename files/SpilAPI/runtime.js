@@ -14,6 +14,9 @@ cr.plugins_.SpilAPI = function(runtime) {
 		pluginProto,
 		instanceProto;
 
+	/**
+	 * Proto
+	 */
 	pluginProto = cr.plugins_.SpilAPI.prototype;
 		
 	pluginProto.Type = function(plugin) {
@@ -37,6 +40,7 @@ cr.plugins_.SpilAPI = function(runtime) {
 		self.API = null;
 		self.apiReady = false;
 		self.apiVersion = null;
+		self.branding = {};
 		self.gamePaused = false;
 
 		if(w && w.GameAPI) {
@@ -58,43 +62,88 @@ cr.plugins_.SpilAPI = function(runtime) {
 	 */
 	function Cnds() {};
 
+
+	Cnds.prototype.apiLoaded = function() {
+		return (self.API) ? true : false;
+	};
+
 	Cdns.prototype.apiReady = function() {
 		return self.apiReady;
 	};
 	
-	// ... other conditions here ...
-	
+	Cnds.isPaused = function() {
+		return self.gamePaused;
+	};
+
+	Cnds.isSplashScreenEnabled = function() {
+		return self.API.Branding.getSplashScreen().show;
+	};
+
 	pluginProto.cnds = new Cnds();
 	
-	//////////////////////////////////////
-	// Actions
-	function Acts() {};
+	/**
+	 * Actions
+	 */
 
-	// the example action
-	Acts.prototype.MyAction = function (myparam)
-	{
-		// alert the message
-		alert(myparam);
+	function _getOutgoingLink(type) {
+		if(!self.branding[type]) {
+			switch(type) {
+				case "logo":
+					_getLogo();
+				break;
+				case "splashScreen":
+					_getSplashScreen();
+				break;
+				default:
+					if(!self.branding[type]) {
+						self.branding[type] = self.API.branding.getLink(type);
+					}
+				break; 
+			}
+		}
+
+		return (self.branding[type].action) ? self.branding[type].action : false;
+	}
+
+	function _getLogo() {
+		if(!self.branding.logo) {
+			self.branding.logo = self.API.branding.getLogo();
+		}
+
+		return self.branding.logo;
+	}
+
+	function _getSplashScreen() {
+		if(!self.branding.splashScreen) {
+			self.branding.splashScreen = self.API.branding.getSplashScreen();
+		}
+
+		return self.branding.splashScreen;
+	}
+
+	function Acts() {};
+	
+	Acts.prototype.openOutgoingLink = function(type) {
+		if(_getOutgoingLink(type)) {
+			_getOutgoingLink(type).call(this);
+		} else {
+			(function() {}).call(this);
+		}
 	};
-	
-	// ... other actions here ...
-	
+
+	Acts.prototype.requestGamebreak = function() {};
+
 	pluginProto.acts = new Acts();
 	
-	//////////////////////////////////////
-	// Expressions
+	/**
+	 * Expressions
+	 */
 	function Exps() {};
 	
-	// the example expression
-	Exps.prototype.MyExpression = function (ret)	// 'ret' must always be the first parameter - always return the expression's result through it!
-	{
-		ret.set_int(1337);				// return our value
-		// ret.set_float(0.5);			// for returning floats
-		// ret.set_string("Hello");		// for ef_return_string
-		// ret.set_any("woo");			// for ef_return_any, accepts either a number or string
+	Exps.prototype.logoVisual = function(ret) {
+		var src = (self.branding.logo && self.branding.logo.image) ? self.branding.logo.image : '';
+		ret.set_string(src);
 	};
-	
-	// ... other expressions here ...
 	
 	pluginProto.exps = new Exps();
 
