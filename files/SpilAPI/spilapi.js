@@ -1,3 +1,9 @@
+/**
+ * NOTE TO THE PLUGIN DEVELOPER
+ * Please verify this way of loading the API works in your game
+ * If not, you can also use your jQuery implementation
+ */
+
 (function(d, id) {
     var js,
         head = d.getElementsByTagName('head')[0];

@@ -1,4 +1,24 @@
-﻿// ECMAScript 5 strict mode
+﻿/**
+ * NOTE TO THE PLUGIN DEVELOPER
+ * 
+ * This should work (in theory)
+ * however, I could not test it
+ * when I tried to install the plugin in construct2
+ * I got an error saying it could not load the common.js file
+ * and therefore the plugin would not be available
+ * 
+ * Also, edittime.js needs to be filled in to declare actions, conditions and expressions
+ * 
+ * Finally, I updated the script to inject the api source file into the game
+ * using a 'vanilla js' approach instead of jQuery
+ * this needs to be tested, if it doesn't work, feel free to replace it with your jQuery logic
+ *
+ * Hope this helps! let us know
+ */
+
+
+
+// ECMAScript 5 strict mode
 "use strict";
 
 assert2(cr, "cr namespace not created");
